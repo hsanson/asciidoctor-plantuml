@@ -93,3 +93,35 @@ If you want to change the default PlantUML server you can use *PLANTUML_URL*
 environment variables:
 
     PLANTUML_URL="https://my-private-server:80/" asciidoctor -r asciidoctor-plantuml sample.adoc
+
+
+== Installing PlantUML Server
+
+To use this extension you need to have access to a PlantUML server. Installing
+your own server is very simple in Ubuntu:
+
+First you need to create a plantuml.war file from the source code:
+
+[source,bash]
+----
+sudo apt-get install tomcat7 graphviz openjdk-7-jdk git-core maven
+git clone https://github.com/plantuml/plantuml-server.git
+cd plantuml-server
+mvn package
+----
+
+Then copy the *plantuml.war* file generated when building the package (mvn package) to the Tomcat applications folder:
+
+
+[source,bash]
+----
+sudo cp plantuml.war /var/lib/tomcat7/webapps/plantuml.war
+sudo chown tomcat7:tomcat7 /usr/share/jetty/webapps/plantuml.war
+sudo service restart tomcat7
+----
+
+After restarting Tomcat the application will be running on the server port 8080.
+You can change the port and other parameters in the */etc/tomcat7/server.xml* file.
+
+You may also need to set the JAVA_HOME variable in the */etc/defaults/tomcat7*
+file if you have the java runtime in a non-standard place.
