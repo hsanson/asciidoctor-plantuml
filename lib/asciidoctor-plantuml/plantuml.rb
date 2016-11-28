@@ -43,7 +43,46 @@ module Asciidoctor
         PlantUml::configuration.url
       end
 
-      def plantuml_content(code, format, attrs = {})
+      def plantuml_content(code, attrs = {})
+
+        testing = attrs["test"] == "true"
+
+        format = attrs["format"] || DEFAULT_FORMAT
+
+        case format
+        when "png"
+          plantuml_img_content(code, format, attrs)
+        when "txt"
+          plantuml_txt_content(code, format, attrs)
+        when "svg"
+          plantuml_img_content(code, format, attrs)
+        else
+          plantuml_invalid_content(format, attrs)
+        end
+      end
+
+      def plantuml_txt_content(code, format, attrs = {})
+        url = gen_url(code, format)
+        content = "<div class=\"listingblock\">"
+        content += "<div class=\"content\">"
+        content += "<pre "
+        content +="id=\"#{attrs['id']}\" " if attrs['id']
+        content +="class=\"plantuml\">\n"
+
+        begin
+          open(url) do |f|
+            content += f.read
+          end
+        rescue
+          content += "Failed to query PlantUML server #{url}"
+        end
+
+        content +="</pre>"
+        content += "</div>"
+        content += "</div>"
+      end
+
+      def plantuml_img_content(code, format, attrs = {})
         content = "<div class=\"imageblock\">"
         content += "<div class=\"content\">"
         content += "<img "
@@ -56,6 +95,31 @@ module Asciidoctor
         content += "</div>"
         content += "</div>"
       end
+
+      def plantuml_invalid_content(format, attrs = {})
+        content = "<div class=\"listingblock\">"
+        content += "<div class=\"content\">"
+        content += "<pre "
+        content +="id=\"#{attrs['id']}\" " if attrs['id']
+        content +="class=\"plantuml plantuml-error\"> "
+        content += "PlantUML Error: Invalid format \"#{format}\""
+        content +="</pre>"
+        content += "</div>"
+        content += "</div>"
+      end
+
+      def plantuml_server_unavailable_content(url, attrs = {})
+        content = "<div class=\"listingblock\">"
+        content += "<div class=\"content\">"
+        content += "<pre "
+        content +="id=\"#{attrs['id']}\" " if attrs['id']
+        content +="class=\"plantuml plantuml-error\"> "
+        content += "PlantUML Error: cannot connect to PlantUML server at \"#{url}\""
+        content +="</pre>"
+        content += "</div>"
+        content += "</div>"
+      end
+
 
       # Compression code used to generate PlantUML URLs. Taken directly from the
       # Transcoder class in the PlantUML java code.
@@ -146,22 +210,6 @@ module Asciidoctor
 
       def process(parent, target, attrs)
 
-        testing = attrs["test"] == "true"
-
-        check_url = join_paths(server_url, "/png/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000")
-
-        if ! check_server(check_url) && ! testing
-          content = "<div class='plantuml'>PlantUML server [#{check_url}] is unreachable</div>"
-          return create_plantuml_block(parent, content)
-        end
-
-        format = attrs["format"] || DEFAULT_FORMAT
-
-        if ! valid_format?(format)
-          content = "<div class='plantuml'>Invalid format #{format}</div>"
-          return create_plantuml_block(parent, content)
-        end
-
         lines = target.lines
 
         if !(target.lines[0] =~ /@startuml/)
@@ -172,7 +220,8 @@ module Asciidoctor
           lines += ["@enduml"]
         end
 
-        content = plantuml_content(lines.join("\n"), format, attrs)
+        content = plantuml_content(lines.join("\n"), attrs)
+
         return create_plantuml_block(parent, content)
 
       end

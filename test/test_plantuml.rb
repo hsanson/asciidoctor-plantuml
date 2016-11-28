@@ -61,6 +61,10 @@ DOC_MULTI = <<-eos
 User -> (Start)
 User --> (Use the application) : Label
 
+[plantuml, format="png", test="true"]
+User -> (Start)
+User --> (Use the application) : Label
+
 [plantuml, format="txt", test="true"]
 User -> (Start)
 User --> (Use the application) : Label
@@ -69,6 +73,12 @@ eos
 class PlantUmlTest < Test::Unit::TestCase
 
   GENURL = "http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0"
+
+  def setup
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = "http://localhost:8080/plantuml"
+    end
+  end
 
   def test_plantuml_block_processor
 
@@ -145,11 +155,9 @@ class PlantUmlTest < Test::Unit::TestCase
 
     page = Nokogiri::HTML(html)
 
-    elements = page.css('img.plantuml')
-    assert_equal elements.size, 0
-
-    elements = page.css('div.plantuml')
+    elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
+
   end
 
   def test_plantuml_multiple
@@ -159,6 +167,23 @@ class PlantUmlTest < Test::Unit::TestCase
 
     elements = page.css('img.plantuml')
 
+    assert_equal elements.size, 2
+
+    elements = page.css('pre.plantuml')
+    assert_equal elements.size, 1
+
+  end
+
+  def test_plantuml_bad_server
+
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = "http://nonexistent.com/plantuml"
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI), backend: "html5")
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
     assert_equal elements.size, 2
 
   end
