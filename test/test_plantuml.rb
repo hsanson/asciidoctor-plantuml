@@ -8,8 +8,10 @@ DOC_BASIC = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png", test="true"]
+--
 User -> (Start)
 User --> (Use the application) : Label
+--
 eos
 
 DOC_BASIC2 = <<-eos

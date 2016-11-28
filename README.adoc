@@ -22,17 +22,21 @@ commands:
 
 == Creating a diagram
 
-A diagram is written inside a literal block inside any asciidoc file:
+A diagram is written inside an open block inside any asciidoc file:
 
 ----
 [plantuml, format="png", id="myId"]
+--
 alice -> bob : hello
+bob -> alice : hello
+--
 ----
 
- - You can omit the @startuml/@enduml delimiters. The extension adds them if
-   missing.
- - You can create any diagram type supported by PlantUML: sequence, usecase,
-   class, activity, etc.
+NOTE: You can omit the @startuml/@enduml delimiters. The extension adds them if missing.
+
+TIP: You can create any diagram type supported by PlantUML: sequence, usecase, class, activity, etc.
+
+WARNING: You must use an open block, that is delimited by two *-* instead of four as in a literal block.
 
 The above example is substituted by the following HTML snippet when processed by
 this extension:
