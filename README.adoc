@@ -1,0 +1,95 @@
+= Asciidoctor Plantuml Extension
+Horacio Sanson <https://github.com/hsanson/asciidoctor-diagram>
+:description: README for the Asciidoctor PlantUml extension for Asciidoctor.
+:uri-plantuml: http://plantuml.com
+:uri-py-plantuml: https://code.google.com/p/asciidoc-plantuml/
+:uri-asciidoctor-diagram: https://github.com/asciidoctor/asciidoctor-diagram
+
+Asciidoctor PlantUml is an extension that enables you to add
+{uri-plantuml}[PlantUML] diagrams to your AsciiDoc documents.
+
+This extension differs from others like {uri-asciidoctor-diagram}[Asciidoctor
+Diagram] and {uri-py-plantuml}[AsciiDoc PlantUML filter] in that this extension
+does not include PlantUML jar files. Instead it depends on the availability of
+an external PlantUML server.
+
+== Installation
+
+Asciidoctor PlantUml is a RubyGem and can be installed via `gem` or `bundle`
+commands:
+
+    $ gem install asciidoctor-plantuml
+
+== Creating a diagram
+
+A diagram is written inside a literal block inside any asciidoc file:
+
+----
+[plantuml, format="png", id="myId"]
+alice -> bob : hello
+----
+
+ - You can omit the @startuml/@enduml delimiters. The extension adds them if
+   missing.
+ - You can create any diagram type supported by PlantUML: sequence, usecase,
+   class, activity, etc.
+
+The above example is substituted by the following HTML snippet when processed by
+this extension:
+
+[source, html]
+----
+<img id="myId" class="plantuml" src="http://localhost:8080/png/S3dx3fjsaso3d" />
+----
+
+=== PlantUML Server
+
+By default the image source follows the following URL pattern:
+
+.PlantUML URL Pattern
+----
+<server base uri>/<format>/<encoded diagram>
+----
+
+The *<server base uri*> by defaults is *http://localhost:8080/plantuml* and can
+be changed using the following code:
+
+[source,ruby]
+----
+require "asciidoctor-plantuml"
+
+Asciidoctor::PlantUml.configure do |conf|
+  conf.url = "http://my-private-server:8080"
+end
+----
+
+The *<format>* is taken from the block format attribute. It defaults to *png*
+and can take any of *png*, *txt* and *svg*.
+
+Finally the *<encoded diagram>* is generated automatically by this extension.
+This is the diagram string compressed and encoded in a format that the PlantUML
+server understands.
+
+=== Diagram Attributes
+
+There are some additional attributes you can add to the block to customize how
+the diagram is displayed:
+
+  - id: Sets the id attribute of the img element.
+  - alt: Sets the alt attribute of the img element.
+  - width: Sets the width attribute of the img element.
+  - height: Sets the height attribute of the img element.
+  - format: Sets the format of the generated image. Can be either png, svg or
+    txt.
+
+== Using Asciidoctor Cli
+
+To load the asciidoctor-plantuml extension when using the asciidoctor command
+line tool you can use the `-r` flag:
+
+    asciidoctor -r asciidoctor-plantuml sample.adoc
+
+If you want to change the default PlantUML server you can use *PLANTUML_URL*
+environment variables:
+
+    PLANTUML_URL="https://my-private-server:80/" asciidoctor -r asciidoctor-plantuml sample.adoc
