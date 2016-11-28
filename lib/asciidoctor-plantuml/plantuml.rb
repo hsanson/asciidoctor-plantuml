@@ -44,13 +44,17 @@ module Asciidoctor
       end
 
       def plantuml_content(code, format, attrs = {})
-        content = "<img "
+        content = "<div class=\"imageblock\">"
+        content += "<div class=\"content\">"
+        content += "<img "
         content +="id=\"#{attrs['id']}\" " if attrs['id']
         content +="class=\"plantuml\" "
         content +="width=\"#{attrs['width']}\" " if attrs['width']
         content +="height=\"#{attrs['height']}\" " if attrs['height']
         content +="alt=\"#{attrs['alt']}\" " if attrs['alt']
         content +="src=\"#{gen_url(code, format)}\" />"
+        content += "</div>"
+        content += "</div>"
       end
 
       # Compression code used to generate PlantUML URLs. Taken directly from the
