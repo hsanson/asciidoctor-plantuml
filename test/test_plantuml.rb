@@ -7,7 +7,7 @@ require "asciidoctor-plantuml"
 DOC_BASIC = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true"]
+[plantuml, format="png"]
 --
 User -> (Start)
 User --> (Use the application) : Label
@@ -17,7 +17,7 @@ eos
 DOC_BASIC2 = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true"]
+[plantuml, format="png"]
 @startuml
 User -> (Start)
 User --> (Use the application) : Label
@@ -27,7 +27,7 @@ eos
 DOC_ID = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true", id="myId"]
+[plantuml, format="png", id="myId"]
 User -> (Start)
 User --> (Use the application) : Label
 eos
@@ -35,7 +35,7 @@ eos
 DOC_DIM = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true", width="100px", height="50px"]
+[plantuml, format="png", width="100px", height="50px"]
 User -> (Start)
 User --> (Use the application) : Label
 eos
@@ -43,7 +43,7 @@ eos
 DOC_ALT = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true", alt="alt"]
+[plantuml, format="png", alt="alt"]
 User -> (Start)
 User --> (Use the application) : Label
 eos
@@ -51,7 +51,7 @@ eos
 DOC_BAD_FORMAT = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="jpg", test="true"]
+[plantuml, format="jpg"]
 User -> (Start)
 User --> (Use the application) : Label
 eos
@@ -59,17 +59,27 @@ eos
 DOC_MULTI = <<-eos
 = Hello PlantUML!
 
-[plantuml, format="png", test="true"]
+[plantuml, format="png"]
 User -> (Start)
 User --> (Use the application) : Label
 
-[plantuml, format="png", test="true"]
+[plantuml, format="png"]
 User -> (Start)
 User --> (Use the application) : Label
 
-[plantuml, format="txt", test="true"]
+[plantuml, format="txt"]
 User -> (Start)
 User --> (Use the application) : Label
+eos
+
+DOC_TXT = <<-eos
+= Hello PlantUML!
+
+[plantuml, format="txt"]
+--
+User -> (Start)
+User --> (Use the application) : Label
+--
 eos
 
 class PlantUmlTest < Test::Unit::TestCase
@@ -79,6 +89,7 @@ class PlantUmlTest < Test::Unit::TestCase
   def setup
     Asciidoctor::PlantUml.configure do |c|
       c.url = "http://localhost:8080/plantuml"
+      c.txt_enable = true
     end
   end
 
@@ -168,11 +179,10 @@ class PlantUmlTest < Test::Unit::TestCase
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
+    assert elements.size >= 2
 
-    assert_equal elements.size, 2
-
-    elements = page.css('pre.plantuml')
-    assert_equal elements.size, 1
+    elements = page.css('.plantuml-error')
+    assert_equal elements.size, 0
 
   end
 
@@ -186,8 +196,59 @@ class PlantUmlTest < Test::Unit::TestCase
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
-    assert_equal elements.size, 2
+    assert_equal elements.size, 3
 
+    elements = page.css('.plantuml-error')
+    assert_equal elements.size, 0
   end
 
+  def test_plantuml_invalid_uri
+
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = "ftp://test.com"
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+  end
+
+  def test_plantuml_nil_uri
+
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = nil
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+  end
+
+  def test_plantuml_empty_uri
+
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = ""
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+  end
+
+  def test_disable_txt
+
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = "http://localhost:8080/plantuml"
+      c.txt_enable = false
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_TXT), backend: "html5")
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+
+  end
 end

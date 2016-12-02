@@ -8,13 +8,13 @@ module Asciidoctor
 
     class Configuration
 
-      DEFAULT_URL = ENV["PLANTUML_URL"] || "http://localhost:8080/plantuml"
+      DEFAULT_URL = ENV["PLANTUML_URL"] || ""
 
-      attr_accessor :url, :test
+      attr_accessor :url, :txt_enable
 
       def initialize
         @url = DEFAULT_URL
-        @test = false
+        @txt_enable = true
       end
     end
 
@@ -43,17 +43,27 @@ module Asciidoctor
         PlantUml::configuration.url
       end
 
+      def txt_enabled?
+        PlantUml::configuration.txt_enable
+      end
+
       def plantuml_content(code, attrs = {})
 
-        testing = attrs["test"] == "true"
-
         format = attrs["format"] || DEFAULT_FORMAT
+
+        if !valid_uri?(server_url)
+          return plantuml_server_unavailable_content(server_url, attrs)
+        end
 
         case format
         when "png"
           plantuml_img_content(code, format, attrs)
         when "txt"
-          plantuml_txt_content(code, format, attrs)
+          if txt_enabled?
+            plantuml_txt_content(code, format, attrs)
+          else
+            plantuml_invalid_content(format, attrs)
+          end
         when "svg"
           plantuml_img_content(code, format, attrs)
         else
@@ -62,21 +72,23 @@ module Asciidoctor
       end
 
       def plantuml_txt_content(code, format, attrs = {})
-        url = gen_url(code, format)
+        begin
+          url = gen_url(code, format)
+          open(url) do |f|
+            plantuml_ascii_content(f.read, format, attrs)
+          end
+        rescue
+          plantuml_img_content(code, format, attrs)
+        end
+      end
+
+      def plantuml_ascii_content(code, format, attrs = {})
         content = "<div class=\"listingblock\">"
         content += "<div class=\"content\">"
         content += "<pre "
         content +="id=\"#{attrs['id']}\" " if attrs['id']
         content +="class=\"plantuml\">\n"
-
-        begin
-          open(url) do |f|
-            content += f.read
-          end
-        rescue
-          content += "Failed to query PlantUML server #{url}"
-        end
-
+        content += code
         content +="</pre>"
         content += "</div>"
         content += "</div>"
@@ -178,6 +190,9 @@ module Asciidoctor
         return false
       end
 
+      def valid_uri?(uri)
+        !(uri =~ /\A#{URI::regexp(['http', 'https'])}\z/).nil?
+      end
 
       def create_plantuml_block(parent, content)
         Asciidoctor::Block.new parent, :pass, :content_model => :raw,
