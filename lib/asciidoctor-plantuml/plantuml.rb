@@ -10,11 +10,13 @@ module Asciidoctor
 
       DEFAULT_URL = ENV["PLANTUML_URL"] || ""
 
-      attr_accessor :url, :txt_enable
+      attr_accessor :url, :txt_enable, :svg_enable, :png_enable
 
       def initialize
         @url = DEFAULT_URL
         @txt_enable = true
+        @svg_enable = true
+        @png_enable = true
       end
     end
 
@@ -47,9 +49,25 @@ module Asciidoctor
         PlantUml::configuration.txt_enable
       end
 
+      def png_enabled?
+        PlantUml::configuration.png_enable
+      end
+
+      def svg_enabled?
+        PlantUml::configuration.svg_enable
+      end
+
+      def enabled?
+        txt_enabled? || png_enabled? || svg_enabled?
+      end
+
       def plantuml_content(code, attrs = {})
 
         format = attrs["format"] || DEFAULT_FORMAT
+
+        if !enabled?
+          return plantuml_disabled_content(code, attrs)
+        end
 
         if !valid_uri?(server_url)
           return plantuml_server_unavailable_content(server_url, attrs)
@@ -127,6 +145,18 @@ module Asciidoctor
         content +="id=\"#{attrs['id']}\" " if attrs['id']
         content +="class=\"plantuml plantuml-error\"> "
         content += "PlantUML Error: cannot connect to PlantUML server at \"#{url}\""
+        content +="</pre>"
+        content += "</div>"
+        content += "</div>"
+      end
+
+      def plantuml_disabled_content(code, attrs = {})
+        content = "<div class=\"listingblock\">"
+        content += "<div class=\"content\">"
+        content += "<pre "
+        content +="id=\"#{attrs['id']}\" " if attrs['id']
+        content +="class=\"plantuml plantuml-error\">\n"
+        content += code
         content +="</pre>"
         content += "</div>"
         content += "</div>"
