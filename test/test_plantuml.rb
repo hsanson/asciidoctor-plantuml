@@ -8,83 +8,115 @@ DOC_BASIC = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png"]
---
+.Title Of this
+----
 User -> (Start)
 User --> (Use the application) : Label
---
+----
 eos
 
 DOC_BASIC2 = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png"]
+.Title Of this
+[[fig-xref]]
+----
 @startuml
 User -> (Start)
 User --> (Use the application) : Label
 @enduml
+----
+eos
+
+DOC_BASIC3 = <<-eos
+= Hello Compound PlantUML!
+
+[plantuml, format="png"]
+----
+[COMP1]
+[COMP2]
+[COMP1] -> [COMP2]
+[COMP2] --> [COMP3]
+----
 eos
 
 DOC_ID = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png", id="myId"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 eos
 
 DOC_DIM = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png", width="100px", height="50px"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 eos
 
 DOC_ALT = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png", alt="alt"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 eos
 
 DOC_BAD_FORMAT = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="jpg"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 eos
 
 DOC_MULTI = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 
 [plantuml, format="png"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 
 [plantuml, format="txt"]
+----
 User -> (Start)
 User --> (Use the application) : Label
+----
 eos
 
 DOC_TXT = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="txt"]
---
+----
 User -> (Start)
 User --> (Use the application) : Label
---
+----
 eos
 
 class PlantUmlTest < Test::Unit::TestCase
 
   GENURL = "http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0"
+  GENURL2 = "http://localhost:8080/plantuml/png/U9npA2v9B2efpStXYdRszmqmZ8NGHh4mleAkdGAAa15G22Pc7Clba9gN0jGE00W75Cm0"
 
   def setup
     Asciidoctor::PlantUml.configure do |c|
@@ -118,6 +150,19 @@ class PlantUmlTest < Test::Unit::TestCase
     element = elements.first
 
     assert_equal GENURL, element["src"]
+  end
+
+  def test_plantuml_block_processor3
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC3), backend: "html5")
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL2, element["src"]
   end
 
   def test_plantuml_id_attribute

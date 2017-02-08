@@ -250,6 +250,11 @@ module Asciidoctor
 
     class BlockProcessor < Asciidoctor::Extensions::BlockProcessor
 
+      use_dsl
+      named :plantuml
+      on_context :listing
+      content_model :simple
+
       def process(parent, target, attrs)
 
         lines = target.lines
@@ -264,15 +269,15 @@ module Asciidoctor
 
         content = Processor.plantuml_content(lines.join("\n"), attrs)
 
-        return create_plantuml_block(parent, content)
+        return create_plantuml_block(parent, content, attrs)
 
       end
 
       private
 
-      def create_plantuml_block(parent, content)
-        Asciidoctor::Block.new parent, :pass, :content_model => :raw,
-          :source => content, :subs => :default
+      def create_plantuml_block(parent, content, attrs)
+        Asciidoctor::Block.new parent, :pass,  { content_model: :raw,
+                                      source: content, subs: :default }.merge(attrs)
       end
 
     end
