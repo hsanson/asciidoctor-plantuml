@@ -119,65 +119,45 @@ module Asciidoctor
         end
 
         def plantuml_ascii_content(code, format, attrs = {})
-          content = "<div class=\"listingblock\">"
-          content += "<div class=\"content\">"
-          content += "<pre "
+          content = "<pre "
           content +="id=\"#{attrs['id']}\" " if attrs['id']
           content +="class=\"plantuml\">\n"
           content += code
           content +="</pre>"
-          content += "</div>"
-          content += "</div>"
         end
 
         def plantuml_img_content(code, format, attrs = {})
-          content = "<div class=\"imageblock\">"
-          content += "<div class=\"content\">"
-          content += "<img "
+          content = "<img "
           content +="id=\"#{attrs['id']}\" " if attrs['id']
           content +="class=\"plantuml\" "
           content +="width=\"#{attrs['width']}\" " if attrs['width']
           content +="height=\"#{attrs['height']}\" " if attrs['height']
           content +="alt=\"#{attrs['alt']}\" " if attrs['alt']
           content +="src=\"#{gen_url(code, format)}\" />"
-          content += "</div>"
-          content += "</div>"
         end
 
         def plantuml_invalid_content(format, attrs = {})
-          content = "<div class=\"listingblock\">"
-          content += "<div class=\"content\">"
-          content += "<pre "
+          content = "<pre "
           content +="id=\"#{attrs['id']}\" " if attrs['id']
           content +="class=\"plantuml plantuml-error\"> "
           content += "PlantUML Error: Invalid format \"#{format}\""
           content +="</pre>"
-          content += "</div>"
-          content += "</div>"
         end
 
         def plantuml_server_unavailable_content(url, attrs = {})
-          content = "<div class=\"listingblock\">"
-          content += "<div class=\"content\">"
-          content += "<pre "
+          content = "<pre "
           content +="id=\"#{attrs['id']}\" " if attrs['id']
           content +="class=\"plantuml plantuml-error\"> "
           content += "PlantUML Error: cannot connect to PlantUML server at \"#{url}\""
           content +="</pre>"
-          content += "</div>"
-          content += "</div>"
         end
 
         def plantuml_disabled_content(code, attrs = {})
-          content = "<div class=\"listingblock\">"
-          content += "<div class=\"content\">"
-          content += "<pre "
+          content = "<pre "
           content +="id=\"#{attrs['id']}\" " if attrs['id']
           content +="class=\"plantuml plantuml-error\">\n"
           content += code
           content +="</pre>"
-          content += "</div>"
-          content += "</div>"
         end
 
         def encode6bit(b)
@@ -276,8 +256,11 @@ module Asciidoctor
       private
 
       def create_plantuml_block(parent, content, attrs)
-        Asciidoctor::Block.new parent, :pass,  { content_model: :raw,
-                                      source: content, subs: :default }.merge(attrs)
+        Asciidoctor::Block.new parent, :listing,  {
+          content_model: :raw,
+          source: content,
+          subs: :default,
+          attributes: attrs}
       end
 
     end
