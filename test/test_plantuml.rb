@@ -8,7 +8,6 @@ DOC_BASIC = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png"]
-.Title Of this
 ----
 User -> (Start)
 User --> (Use the application) : Label
@@ -19,8 +18,6 @@ DOC_BASIC2 = <<-eos
 = Hello PlantUML!
 
 [plantuml, format="png"]
-.Title Of this
-[[fig-xref]]
 ----
 @startuml
 User -> (Start)
@@ -83,20 +80,27 @@ eos
 
 DOC_MULTI = <<-eos
 = Hello PlantUML!
+:listing-caption: Diagram
 
+[#fig-1,reftext='{listing-caption} {counter:refnum}']
 [plantuml, format="png"]
+.PNG Format
 ----
 User -> (Start)
 User --> (Use the application) : Label
 ----
 
+[#fig-2,reftext='{listing-caption} {counter:refnum}']
 [plantuml, format="png"]
+.PNG Format 2
 ----
 User -> (Start)
 User --> (Use the application) : Label
 ----
 
+[#fig-3,reftext='{listing-caption} {counter:refnum}']
 [plantuml, format="txt"]
+.TXT Format
 ----
 User -> (Start)
 User --> (Use the application) : Label
@@ -224,11 +228,19 @@ class PlantUmlTest < Test::Unit::TestCase
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
-    assert elements.size >= 2
+    assert_equal elements.size, 2
 
     elements = page.css('.plantuml-error')
     assert_equal elements.size, 0
 
+    # Check the blocks have captions
+    elements = page.css('div.title')
+    assert_equal elements.size, 3
+
+    # Check the caption counter works as expected.
+    assert_equal elements[0].text, "Diagram 1. PNG Format"
+    assert_equal elements[1].text, "Diagram 2. PNG Format 2"
+    assert_equal elements[2].text, "Diagram 3. TXT Format"
   end
 
   def test_plantuml_bad_server
