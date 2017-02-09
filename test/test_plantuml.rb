@@ -134,6 +134,8 @@ class PlantUmlTest < Test::Unit::TestCase
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.imageblock').size, 1
+
     elements = page.css('img.plantuml')
 
     assert_equal elements.size, 1
@@ -147,6 +149,8 @@ class PlantUmlTest < Test::Unit::TestCase
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC2), backend: "html5")
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.imageblock').size, 1
+
     elements = page.css('img.plantuml')
 
     assert_equal elements.size, 1
@@ -159,6 +163,8 @@ class PlantUmlTest < Test::Unit::TestCase
   def test_plantuml_block_processor3
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC3), backend: "html5")
     page = Nokogiri::HTML(html)
+
+    assert_equal page.css('div.imageblock').size, 1
 
     elements = page.css('img.plantuml')
 
@@ -174,6 +180,8 @@ class PlantUmlTest < Test::Unit::TestCase
     html = ::Asciidoctor.convert(StringIO.new(DOC_ID), backend: "html5")
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.imageblock').size, 1
+
     elements = page.css('img.plantuml')
 
     assert_equal elements.size, 1
@@ -187,6 +195,8 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_DIM), backend: "html5")
     page = Nokogiri::HTML(html)
+
+    assert_equal page.css('div.imageblock').size, 1
 
     elements = page.css('img.plantuml')
 
@@ -203,6 +213,8 @@ class PlantUmlTest < Test::Unit::TestCase
     html = ::Asciidoctor.convert(StringIO.new(DOC_ALT), backend: "html5")
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.imageblock').size, 1
+
     elements = page.css('img.plantuml')
 
     assert_equal elements.size, 1
@@ -217,6 +229,8 @@ class PlantUmlTest < Test::Unit::TestCase
 
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.listingblock').size, 1
+
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
 
@@ -226,6 +240,9 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI), backend: "html5")
     page = Nokogiri::HTML(html)
+
+    assert_equal page.css('div.imageblock').size, 2
+    assert_equal page.css('div.listingblock').size, 1
 
     elements = page.css('img.plantuml')
     assert_equal elements.size, 2
@@ -252,6 +269,8 @@ class PlantUmlTest < Test::Unit::TestCase
     html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI), backend: "html5")
     page = Nokogiri::HTML(html)
 
+    assert_equal page.css('div.imageblock').size, 3
+
     elements = page.css('img.plantuml')
     assert_equal elements.size, 3
 
@@ -267,6 +286,7 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
     page = Nokogiri::HTML(html)
+    assert_equal page.css('div.listingblock').size, 1
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
   end
@@ -279,6 +299,7 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
     page = Nokogiri::HTML(html)
+    assert_equal page.css('div.listingblock').size, 1
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
   end
@@ -291,6 +312,7 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: "html5")
     page = Nokogiri::HTML(html)
+    assert_equal page.css('div.listingblock').size, 1
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
   end
@@ -304,6 +326,7 @@ class PlantUmlTest < Test::Unit::TestCase
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_TXT), backend: "html5")
     page = Nokogiri::HTML(html)
+    assert_equal page.css('div.listingblock').size, 1
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
 

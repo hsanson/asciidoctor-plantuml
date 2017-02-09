@@ -2,6 +2,7 @@ require 'uri'
 require 'zlib'
 require 'open-uri'
 require 'net/http'
+require "nokogiri"
 
 module Asciidoctor
   module PlantUml
@@ -225,6 +226,21 @@ module Asciidoctor
 
           path
         end
+      end
+    end
+
+    # Postprocessor that replaces the listingblock class with the imageblock
+    # class in all plantuml image blocks. This ensures plantuml images are
+    # styled as images instead of listings.
+    class PostProcessor < Asciidoctor::Extensions::Postprocessor
+      def process document, output
+        page = Nokogiri::HTML(output)
+
+        page.css('img.plantuml').each do |img|
+          img.parent.parent.parent['class'] = "imageblock"
+        end
+
+        page.to_s
       end
     end
 
