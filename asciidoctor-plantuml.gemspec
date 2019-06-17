@@ -19,12 +19,16 @@ Gem::Specification.new do |s|
   rescue
     s.files             = Dir['**/*']
   end
+
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ["lib"]
 
+  s.required_ruby_version = '>= 2.1'
+
   s.add_development_dependency "bundler", "~> 1.3"
   s.add_development_dependency "rake", "~> 10.5"
   s.add_development_dependency "nokogiri", "~> 1.6"
-  s.add_runtime_dependency "asciidoctor", "~> 1.5"
+  s.add_development_dependency "test-unit"
+  s.add_runtime_dependency "asciidoctor", ">= 1.5.6", "< 3.0.0"
 end
