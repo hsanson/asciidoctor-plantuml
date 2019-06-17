@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'uri'
+require 'open-uri'
 require 'zlib'
 require 'open-uri'
 require 'net/http'
@@ -105,7 +106,7 @@ module Asciidoctor
 
         def plantuml_txt_content(code, format, attrs = {})
           url = gen_url(code, format)
-          URI.open(url) do |f|
+          URI(url).open do |f|
             plantuml_ascii_content(f.read, attrs)
           end
         rescue OpenURI::HTTPError, Errno::ECONNREFUSED, SocketError
