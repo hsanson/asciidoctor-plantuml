@@ -1,0 +1,19 @@
+AllCops:
+  TargetRubyVersion: 2.3
+
+Naming/FileName:
+  Enabled: true
+  Exclude:
+    - lib/asciidoctor-plantuml.rb
+
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/AbcSize:
+  Max: 30
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
