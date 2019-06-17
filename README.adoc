@@ -55,7 +55,7 @@ By default the image source follows the following URL pattern:
 <server base uri>/<format>/<encoded diagram>
 ----
 
-The *<server base uri*> by defaults is *http://localhost:8080/plantuml* and can
+The *<server base uri>* by defaults is *http://localhost:8080/plantuml* and can
 be changed using the following code:
 
 [source,ruby]
@@ -70,14 +70,14 @@ end
 The *<format>* is taken from the block format attribute. It defaults to *png*
 and can take any of *png*, *txt* and *svg*.
 
-Finally the *<encoded diagram>* is generated automatically by this extension.
+The *<encoded diagram>* is generated automatically by this extension.
 This is the diagram string compressed and encoded in a format that the PlantUML
 server understands.
 
 === Diagram Attributes
 
-There are some additional attributes you can add to the block to customize how
-the diagram is displayed:
+There are some attributes you can add to the block to customize how the diagram
+is displayed:
 
   - id: Sets the id attribute of the img element.
   - alt: Sets the alt attribute of the img element.
@@ -101,10 +101,15 @@ environment variables:
 
 == Installing PlantUML Server
 
-To use this extension you need to have access to a PlantUML server. Installing
-your own server is very simple in Ubuntu:
+=== Docker
 
-First you need to create a plantuml.war file from the source code:
+The simplest way to start a PlantUML server is using docker:
+
+    docker run -d --name plantuml -p 8081:8080 plantuml/plantuml-server:jetty
+
+=== Source
+
+In Ubuntu first you need to create a plantuml.war file from the source code:
 
 [source,bash]
 ----
