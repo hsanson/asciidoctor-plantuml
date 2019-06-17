@@ -5,6 +5,11 @@ Horacio Sanson <https://github.com/hsanson/asciidoctor-diagram>
 :uri-py-plantuml: https://code.google.com/p/asciidoc-plantuml/
 :uri-asciidoctor-diagram: https://github.com/asciidoctor/asciidoctor-diagram
 
+ifdef::env-github[]
+image:https://img.shields.io/travis/hsanson/asciidoctor-plantuml/master.svg[Travis build status, link=https://travis-ci.org/hsanson/asciidoctor-plantuml]
+image:https://img.shields.io/gem/v/asciidoctor-plantuml.svg?style=flat[Latest Release, link=https://rubygems.org/gems/asciidoctor-plantuml]
+endif::[]
+
 Asciidoctor PlantUml is an extension that enables you to add
 {uri-plantuml}[PlantUML] diagrams to your AsciiDoc documents.
 
