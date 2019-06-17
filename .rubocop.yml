@@ -1,6 +1,11 @@
 AllCops:
   TargetRubyVersion: 2.3
 
+Naming/FileName:
+  Enabled: true
+  Exclude:
+    - lib/asciidoctor-plantuml.rb
+
 Metrics/MethodLength:
   Max: 20
 

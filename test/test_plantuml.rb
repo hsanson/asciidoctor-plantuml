@@ -4,7 +4,7 @@ require 'test/unit'
 require 'asciidoctor'
 require 'stringio'
 require 'nokogiri'
-require 'asciidoctor_plantuml'
+require 'asciidoctor-plantuml'
 
 DOC_BASIC = <<~ENDOFSTRING
   = Hello PlantUML!
