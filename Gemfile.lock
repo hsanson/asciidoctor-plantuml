@@ -11,7 +11,7 @@ GEM
     ast (2.4.0)
     jaro_winkler (1.5.2)
     mini_portile2 (2.4.0)
-    nokogiri (1.10.3)
+    nokogiri (1.10.5)
       mini_portile2 (~> 2.4.0)
     parallel (1.17.0)
     parser (2.6.3.0)
