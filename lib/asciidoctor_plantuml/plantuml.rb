@@ -213,7 +213,7 @@ module Asciidoctor
         end
 
         def valid_uri?(uri)
-          !(uri =~ /\A#{URI.regexp(%w[http https])}\z/).nil?
+          !(uri =~ /\A#{::URI::DEFAULT_PARSER.make_regexp(%w[http https])}\z/).nil?
         end
 
         def join_paths(*paths, separator: '/')
