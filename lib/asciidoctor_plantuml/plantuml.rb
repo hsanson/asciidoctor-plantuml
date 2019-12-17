@@ -39,6 +39,7 @@ module Asciidoctor
     class Processor
       FORMATS = %w[png svg txt].freeze
       DEFAULT_FORMAT = FORMATS[0]
+      URI_SCHEMES_REGEXP = ::URI::DEFAULT_PARSER.make_regexp(%w[http https])
 
       class << self
         def valid_format?(format)
@@ -213,7 +214,7 @@ module Asciidoctor
         end
 
         def valid_uri?(uri)
-          !(uri =~ /\A#{::URI::DEFAULT_PARSER.make_regexp(%w[http https])}\z/).nil?
+          !(uri =~ /\A#{URI_SCHEMES_REGEXP}\z/).nil?
         end
 
         def join_paths(*paths, separator: '/')
