@@ -72,6 +72,20 @@ Asciidoctor::PlantUml.configure do |conf|
 end
 ----
 
+In 2020 the plantuml.com server changed the URL encoding.
+Now you'll need to add a small string to signal the encoding.
+You can enable the new behavior like this:
+
+[source,ruby]
+----
+require "asciidoctor-plantuml"
+
+Asciidoctor::PlantUml.configure do |conf|
+  conf.url = "https://www.plantuml.com"
+  conf.encoding = 'deflate'
+end
+----
+
 The *<format>* is taken from the block format attribute. It defaults to *png*
 and can take any of *png*, *txt* and *svg*.
 

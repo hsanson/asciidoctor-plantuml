@@ -12,14 +12,16 @@ module Asciidoctor
     # PlantUML Configuration
     class Configuration
       DEFAULT_URL = ENV['PLANTUML_URL'] || ''
+      DEFAULT_ENCODING = ENV['PLANTUML_ENCODING'] || 'legacy'
 
-      attr_accessor :url, :txt_enable, :svg_enable, :png_enable
+      attr_accessor :url, :txt_enable, :svg_enable, :png_enable, :encoding
 
       def initialize
         @url = DEFAULT_URL
         @txt_enable = true
         @svg_enable = true
         @png_enable = true
+        @encoding = DEFAULT_ENCODING
       end
     end
 
@@ -39,11 +41,22 @@ module Asciidoctor
     class Processor
       FORMATS = %w[png svg txt].freeze
       DEFAULT_FORMAT = FORMATS[0]
+
+      ENCODINGS = %w[legacy deflate].freeze
+      DEFAULT_ENCODING = ENCODINGS[0]
+
+      ENCODINGS_MAGIC_STRINGS_MAP = Hash.new('')
+      ENCODINGS_MAGIC_STRINGS_MAP['deflate'] = '~1'
+
       URI_SCHEMES_REGEXP = ::URI::DEFAULT_PARSER.make_regexp(%w[http https])
 
       class << self
         def valid_format?(format)
           FORMATS.include?(format)
+        end
+
+        def valid_encoding?(encoding)
+          ENCODINGS.include?(encoding)
         end
 
         def server_url
@@ -92,6 +105,7 @@ module Asciidoctor
         # the transcoder class in the PlantUML java code.
         def gen_url(text, format)
           result = ''
+          result += encoding_magic_prefix
           compressed_data = Zlib::Deflate.deflate(text)
           compressed_data.chars.each_slice(3) do |bytes|
             # print bytes[0], ' ' , bytes[1] , ' ' , bytes[2]
@@ -202,6 +216,10 @@ module Asciidoctor
             encode6bit(c2 & 0x3F).chr +
             encode6bit(c3 & 0x3F).chr +
             encode6bit(c4 & 0x3F).chr
+        end
+
+        def encoding_magic_prefix
+          ENCODINGS_MAGIC_STRINGS_MAP[PlantUml.configuration.encoding]
         end
 
         # Make a call to the PlantUML server with the simplest diagram possible

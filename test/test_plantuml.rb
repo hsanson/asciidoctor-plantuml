@@ -118,6 +118,7 @@ ENDOFSTRING
 class PlantUmlTest < Test::Unit::TestCase
   GENURL = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
   GENURL2 = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStXYdRszmqmZ8NGHh4mleAkdGAAa15G22Pc7Clba9gN0jGE00W75Cm0'
+  GENURL_ENCODING = 'http://localhost:8080/plantuml/png/~1U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
 
   def setup
     Asciidoctor::PlantUml.configure do |c|
@@ -163,6 +164,23 @@ class PlantUmlTest < Test::Unit::TestCase
     element = elements.first
 
     assert_equal GENURL2, element['src']
+  end
+
+  def test_plantuml_block_processor_encoding
+    Asciidoctor::PlantUml.configure do |c|
+      c.encoding = 'deflate'
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL_ENCODING, element['src']
   end
 
   def test_plantuml_id_attribute
