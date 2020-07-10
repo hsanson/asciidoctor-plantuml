@@ -17,6 +17,17 @@ DOC_BASIC = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_BASIC_LITERAL = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  [plantuml, format="png"]
+  .Title Of this
+  ....
+  User -> (Start)
+  User --> (Use the application) : Label
+  ....
+ENDOFSTRING
+
 DOC_BASIC2 = <<~ENDOFSTRING
   = Hello PlantUML!
 
@@ -31,6 +42,20 @@ DOC_BASIC2 = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_BASIC2_LITERAL = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  [plantuml, format="png"]
+  .Title Of this
+  [[fig-xref]]
+  ....
+  @startuml
+  User -> (Start)
+  User --> (Use the application) : Label
+  @enduml
+  ....
+ENDOFSTRING
+
 DOC_BASIC3 = <<~ENDOFSTRING
   = Hello Compound PlantUML!
 
@@ -41,6 +66,18 @@ DOC_BASIC3 = <<~ENDOFSTRING
   [COMP1] -> [COMP2]
   [COMP2] --> [COMP3]
   ----
+ENDOFSTRING
+
+DOC_BASIC3_LITERAL = <<~ENDOFSTRING
+  = Hello Compound PlantUML!
+
+  [plantuml, format="png"]
+  ....
+  [COMP1]
+  [COMP2]
+  [COMP1] -> [COMP2]
+  [COMP2] --> [COMP3]
+  ....
 ENDOFSTRING
 
 DOC_ID = <<~ENDOFSTRING
@@ -105,6 +142,28 @@ DOC_MULTI = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_MULTI_LITERAL = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  [plantuml, format="png"]
+  ....
+  User -> (Start)
+  User --> (Use the application) : Label
+  ....
+
+  [plantuml, format="png"]
+  ....
+  User -> (Start)
+  User --> (Use the application) : Label
+  ....
+
+  [plantuml, format="txt"]
+  ....
+  User -> (Start)
+  User --> (Use the application) : Label
+  ....
+ENDOFSTRING
+
 DOC_TXT = <<~ENDOFSTRING
   = Hello PlantUML!
 
@@ -140,6 +199,19 @@ class PlantUmlTest < Test::Unit::TestCase
     assert_equal GENURL, element['src']
   end
 
+  def test_plantuml_block_literal_processor
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC_LITERAL), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL, element['src']
+  end
+
   def test_plantuml_block_processor2
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC2), backend: 'html5')
     page = Nokogiri::HTML(html)
@@ -153,8 +225,34 @@ class PlantUmlTest < Test::Unit::TestCase
     assert_equal GENURL, element['src']
   end
 
+  def test_plantuml_block_literal_processor2
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC2_LITERAL), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL, element['src']
+  end
+
   def test_plantuml_block_processor3
     html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC3), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL2, element['src']
+  end
+
+  def test_plantuml_block_literal_processor3
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC3_LITERAL), backend: 'html5')
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -229,8 +327,19 @@ class PlantUmlTest < Test::Unit::TestCase
     assert_equal elements.size, 1
   end
 
-  def test_plantuml_multiple
+  def test_plantuml_multiple_listing
     html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+    assert elements.size >= 2
+
+    elements = page.css('.plantuml-error')
+    assert_equal elements.size, 0
+  end
+
+  def test_plantuml_multiple_literal
+    html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI_LITERAL), backend: 'html5')
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
