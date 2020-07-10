@@ -259,7 +259,7 @@ module Asciidoctor
     class BlockProcessor < Asciidoctor::Extensions::BlockProcessor
       use_dsl
       named :plantuml
-      on_context :listing
+      on_context :listing, :literal
       content_model :simple
 
       def process(parent, target, attrs)
