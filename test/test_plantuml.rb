@@ -200,7 +200,9 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_block_literal_processor
-    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC_LITERAL), backend: 'html5')
+    html = ::Asciidoctor.convert(
+      StringIO.new(DOC_BASIC_LITERAL), backend: 'html5'
+    )
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -213,7 +215,9 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_block_processor2
-    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC2), backend: 'html5')
+    html = ::Asciidoctor.convert(
+      StringIO.new(DOC_BASIC2), backend: 'html5'
+    )
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -226,7 +230,9 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_block_literal_processor2
-    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC2_LITERAL), backend: 'html5')
+    html = ::Asciidoctor.convert(
+      StringIO.new(DOC_BASIC2_LITERAL), backend: 'html5'
+    )
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -252,7 +258,9 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_block_literal_processor3
-    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC3_LITERAL), backend: 'html5')
+    html = ::Asciidoctor.convert(
+      StringIO.new(DOC_BASIC3_LITERAL), backend: 'html5'
+    )
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -339,7 +347,9 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_multiple_literal
-    html = ::Asciidoctor.convert(StringIO.new(DOC_MULTI_LITERAL), backend: 'html5')
+    html = ::Asciidoctor.convert(
+      StringIO.new(DOC_MULTI_LITERAL), backend: 'html5'
+    )
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
