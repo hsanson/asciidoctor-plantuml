@@ -80,12 +80,9 @@ module Asciidoctor
         end
 
         def plantuml_content_format(code, format, attrs = {})
-          if format == 'svg' && svg_enabled?
-            plantuml_svg_content(code, format, attrs)
-          elsif format == 'png' && png_enabled?
-            plantuml_img_content(code, format, attrs)
-          elsif format == 'txt' && txt_enabled?
-            plantuml_txt_content(code, format, attrs)
+          if %w[png svg txt].include?(format) &&
+             method("#{format}_enabled?").call
+            method("plantuml_#{format}_content").call(code, format, attrs)
           else
             plantuml_invalid_content(format, attrs)
           end
@@ -127,7 +124,7 @@ module Asciidoctor
             plantuml_ascii_content(f.read, attrs)
           end
         rescue OpenURI::HTTPError, Errno::ECONNREFUSED, SocketError
-          plantuml_img_content(code, format, attrs)
+          plantuml_png_content(code, format, attrs)
         end
 
         def plantuml_ascii_content(code, attrs = {})
@@ -142,7 +139,7 @@ module Asciidoctor
           content + '</div>'
         end
 
-        def plantuml_img_content(code, format, attrs = {})
+        def plantuml_png_content(code, format, attrs = {})
           content = '<div class="imageblock">'
           content += '<div class="content">'
           content += '<img '
@@ -159,32 +156,34 @@ module Asciidoctor
         def plantuml_svg_content(code, format, attrs = {})
           content = '<div class="imageblock">'
           content += '<div class="content">'
-          content += "<object type=\"image/svg+xml\" "
+          content += '<object type="image/svg+xml" '
           content += "data=\"#{gen_url(code, format)}\" "
           content += "id=\"#{attrs['id']}\" " if attrs['id']
           content += "width=\"#{attrs['width']}\" " if attrs['width']
           content += "height=\"#{attrs['height']}\" " if attrs['height']
           content += '>'
           attrs['id'] = 'fallback_' + attrs['id'] if attrs['id']
-          content += plantuml_img_content(code, format, attrs)
-          content += "</object>"
+          content += plantuml_png_content(code, format, attrs)
+          content += '</object>'
           content += '</div>'
           content + '</div>'
         end
 
         def plantuml_invalid_content(format, attrs = {})
-          _plantuml_error_content("PlantUML Error: Invalid format \"#{format}\"", attrs)
+          error = "PlantUML Error: Invalid format \"#{format}\""
+          _plantuml_error_content(error, attrs)
         end
 
         def plantuml_server_unavailable_content(url, attrs = {})
-          _plantuml_error_content("Error: cannot connect to PlantUML server at \"#{url}\"", attrs)
+          error = "Error: cannot connect to PlantUML server at \"#{url}\""
+          _plantuml_error_content(error, attrs)
         end
 
         def plantuml_disabled_content(code, attrs = {})
           _plantuml_error_content(code, attrs)
         end
 
-        def _plantuml_error_content(error, attrs= {})
+        def _plantuml_error_content(error, attrs = {})
           content = '<div class="listingblock">'
           content += '<div class="content">'
           content += '<pre '
