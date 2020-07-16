@@ -174,15 +174,28 @@ DOC_TXT = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_SVG = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  [plantuml, format="svg"]
+  ----
+  User -> (Start)
+  User --> (Use the application) : Label
+  ----
+ENDOFSTRING
+
 class PlantUmlTest < Test::Unit::TestCase
   GENURL = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
   GENURL2 = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStXYdRszmqmZ8NGHh4mleAkdGAAa15G22Pc7Clba9gN0jGE00W75Cm0'
   GENURL_ENCODING = 'http://localhost:8080/plantuml/png/~1U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
+  SVGGENURL = 'http://localhost:8080/plantuml/svg/~1U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
 
   def setup
     Asciidoctor::PlantUml.configure do |c|
       c.url = 'http://localhost:8080/plantuml'
       c.txt_enable = true
+      c.png_enable = true
+      c.svg_enable = true
     end
   end
 
@@ -414,6 +427,46 @@ class PlantUmlTest < Test::Unit::TestCase
     end
 
     html = ::Asciidoctor.convert(StringIO.new(DOC_TXT), backend: 'html5')
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+  end
+
+  def test_svg
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = 'http://localhost:8080/plantuml'
+      c.svg_enable = true
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_SVG), backend: 'html5')
+    page = Nokogiri::HTML(html)
+    elements = page.css("object[type='image/svg+xml']")
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal SVGGENURL, element['data']
+  end
+
+  def test_disable_svg
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = 'http://localhost:8080/plantuml'
+      c.svg_enable = false
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_SVG), backend: 'html5')
+    page = Nokogiri::HTML(html)
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+  end
+
+  def test_disable_png
+    Asciidoctor::PlantUml.configure do |c|
+      c.url = 'http://localhost:8080/plantuml'
+      c.png_enable = false
+    end
+
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BASIC_LITERAL), backend: 'html5')
     page = Nokogiri::HTML(html)
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
