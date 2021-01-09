@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.3'
   s.add_development_dependency 'bundler', '~> 1.3'
-  s.add_development_dependency 'nokogiri', '~> 1.6'
+  s.add_development_dependency 'nokogiri', '~> 1.11'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rubocop', '~> 1.7'
   s.add_development_dependency 'test-unit', '~> 3.3'
