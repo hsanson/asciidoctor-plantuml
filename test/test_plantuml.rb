@@ -184,6 +184,18 @@ DOC_SVG = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_BLOCK_MACRO = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  plantuml::test/fixtures/test.puml[]
+ENDOFSTRING
+
+DOC_BLOCK_MACRO_MISSING_FILE = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  plantuml::fixtures/missing.puml[]
+ENDOFSTRING
+
 class PlantUmlTest < Test::Unit::TestCase
   GENURL = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
   GENURL2 = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStXYdRszmqmZ8NGHh4mleAkdGAAa15G22Pc7Clba9gN0jGE00W75Cm0'
@@ -300,6 +312,28 @@ class PlantUmlTest < Test::Unit::TestCase
     element = elements.first
 
     assert_equal GENURL_ENCODING, element['src']
+  end
+
+  def test_plantuml_block_macro_processor
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL, element['src']
+  end
+
+  def test_should_show_file_error
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO_MISSING_FILE), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+    assert_includes html, "No such file or directory"
   end
 
   def test_plantuml_id_attribute

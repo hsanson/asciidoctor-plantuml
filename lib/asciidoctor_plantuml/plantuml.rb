@@ -80,9 +80,11 @@ module Asciidoctor
         end
 
         def plantuml_content_format(code, format, attrs = {})
+          content = code.read
+          content = "@startuml\n#{content}\n@enduml" unless content =~ /^@start.*@end[a-z]*$/m
           if %w[png svg txt].include?(format) &&
              method("#{format}_enabled?").call
-            method("plantuml_#{format}_content").call(code, format, attrs)
+            method("plantuml_#{format}_content").call(content, format, attrs)
           else
             plantuml_invalid_content(format, attrs)
           end
@@ -100,6 +102,16 @@ module Asciidoctor
           plantuml_content_format(code, format, attrs)
         end
 
+        def plantuml_content_from_file(source_file, attrs = {})
+          begin
+            File.open(source_file) do |f|
+              return plantuml_content(f, attrs)
+            end
+          rescue => error
+            return plantuml_invalid_file(source_file, error.message, attrs)
+          end
+        end
+
         # Compression code used to generate PlantUML URLs. Taken directly from
         # the transcoder class in the PlantUML java code.
         def gen_url(text, format)
@@ -114,6 +126,14 @@ module Asciidoctor
             result += append3bytes(b1, b2, b3)
           end
           join_paths(server_url, "#{format}/", result).to_s
+        end
+
+        def create_plantuml_block(parent, content, attrs)
+          Asciidoctor::Block.new parent, :pass,  {
+              content_model: :raw,
+              source: content,
+              subs: :default
+          }.merge(attrs)
         end
 
         private
@@ -181,6 +201,11 @@ module Asciidoctor
 
         def plantuml_disabled_content(code, attrs = {})
           _plantuml_error_content(code, attrs)
+        end
+
+        def plantuml_invalid_file(file, error, attrs = {})
+          error = "PlantUML Error: Could not parse \"#{file}\": #{error}"
+          _plantuml_error_content(error, attrs)
         end
 
         def _plantuml_error_content(error, attrs = {})
@@ -268,27 +293,21 @@ module Asciidoctor
       content_model :simple
 
       def process(parent, target, attrs)
-        lines = target.lines
-
-        unless target.lines[0] =~ /@startuml/
-          lines = ['@startuml'] + target.lines
-        end
-
-        lines += ['@enduml'] unless target.lines[-1] =~ /@enduml/
-
-        content = Processor.plantuml_content(lines.join("\n"), attrs)
-
-        create_plantuml_block(parent, content, attrs)
+        content = Processor.plantuml_content(target, attrs)
+        Processor.create_plantuml_block(parent, content, attrs)
       end
+    end
 
-      private
+    # PlantUML BlockMacroProcessor
+    class BlockMacroProcessor < Asciidoctor::Extensions::BlockMacroProcessor
+      use_dsl
+      named :plantuml
 
-      def create_plantuml_block(parent, content, attrs)
-        Asciidoctor::Block.new parent, :pass,  {
-          content_model: :raw,
-          source: content,
-          subs: :default
-        }.merge(attrs)
+      def process(parent, target, attrs)
+        base_dir = parent.document.base_dir
+        source_file = parent.document.path_resolver.system_path target, base_dir, base_dir
+        content = Processor.plantuml_content_from_file source_file, attrs
+        Processor.create_plantuml_block parent, content, attrs
       end
     end
   end
