@@ -22,6 +22,8 @@ Metrics/AbcSize:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/StringConcatenation:
+  Enabled: false
+
 Layout/LineLength:
-  Exclude:
-    - test/test_plantuml.rb
+  Max: 120
