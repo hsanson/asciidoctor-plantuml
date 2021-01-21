@@ -1,4 +1,6 @@
+---
 AllCops:
+  NewCops: enable
   TargetRubyVersion: 2.5
 
 Naming/FileName:

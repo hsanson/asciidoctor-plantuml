@@ -3,7 +3,6 @@
 require 'uri'
 require 'open-uri'
 require 'zlib'
-require 'open-uri'
 require 'net/http'
 
 module Asciidoctor
@@ -93,9 +92,7 @@ module Asciidoctor
 
           return plantuml_disabled_content(code, attrs) unless enabled?
 
-          unless valid_uri?(server_url)
-            return plantuml_server_unavailable_content(server_url, attrs)
-          end
+          return plantuml_server_unavailable_content(server_url, attrs) unless valid_uri?(server_url)
 
           plantuml_content_format(code, format, attrs)
         end
@@ -251,9 +248,7 @@ module Asciidoctor
         def expand_path(path, current, last, separator)
           path = path[1..-1] if path.start_with?(separator) && current.zero?
 
-          unless path.end_with?(separator) || current == last
-            path = [path, separator]
-          end
+          path = [path, separator] unless path.end_with?(separator) || current == last
 
           path
         end
@@ -270,9 +265,7 @@ module Asciidoctor
       def process(parent, target, attrs)
         lines = target.lines
 
-        unless target.lines[0] =~ /@startuml/
-          lines = ['@startuml'] + target.lines
-        end
+        lines = ['@startuml'] + target.lines unless target.lines[0] =~ /@startuml/
 
         lines += ['@enduml'] unless target.lines[-1] =~ /@enduml/
 
