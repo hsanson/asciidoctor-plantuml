@@ -1,5 +1,7 @@
+---
 AllCops:
-  TargetRubyVersion: 2.3
+  NewCops: enable
+  TargetRubyVersion: 2.5
 
 Naming/FileName:
   Enabled: true
@@ -20,6 +22,8 @@ Metrics/AbcSize:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
-Metrics/LineLength:
-  Exclude:
-    - test/test_plantuml.rb
+Style/StringConcatenation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
