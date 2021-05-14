@@ -78,23 +78,48 @@ module Asciidoctor
           txt_enabled? || png_enabled? || svg_enabled?
         end
 
-        def plantuml_content_format(code, format, attrs = {})
-          if %w[png svg txt].include?(format) &&
-             method("#{format}_enabled?").call
-            method("plantuml_#{format}_content").call(code, format, attrs)
+        def plantuml_content_format(parent, code, format, attrs = {})
+          content = code.read
+
+          # honor subs attributes
+          # e.g. replace asciidoc variables
+          subs = attrs['subs']
+          content = parent.apply_subs(content, parent.resolve_subs(subs)) if subs
+
+          # add @start... and @end... if missing
+          content = "@startuml\n#{content}\n@enduml" unless content =~ /^@start.*@end[a-z]*$/m
+
+          # insert global plantuml config after first line
+          config_path = parent.attr('plantuml-include', '', true)
+          begin
+            content = insert_config_to_content(parent, config_path, content, attrs) unless config_path.empty?
+          rescue StandardError => e
+            return plantuml_invalid_file(config_path, e.message, attrs)
+          end
+
+          if %w[png svg txt].include?(format) && method("#{format}_enabled?").call
+            method("plantuml_#{format}_content").call(content, format, attrs)
           else
             plantuml_invalid_content(format, attrs)
           end
         end
 
-        def plantuml_content(code, attrs = {})
+        def plantuml_content(parent, code, attrs = {})
           format = attrs['format'] || DEFAULT_FORMAT
 
           return plantuml_disabled_content(code, attrs) unless enabled?
 
           return plantuml_server_unavailable_content(server_url, attrs) unless valid_uri?(server_url)
 
-          plantuml_content_format(code, format, attrs)
+          plantuml_content_format(parent, code, format, attrs)
+        end
+
+        def plantuml_content_from_file(parent, source_file, attrs = {})
+          File.open(source_file) do |f|
+            return plantuml_content(parent, f, attrs)
+          end
+        rescue StandardError => e
+          plantuml_invalid_file(source_file, e.message, attrs)
         end
 
         # Compression code used to generate PlantUML URLs. Taken directly from
@@ -113,7 +138,25 @@ module Asciidoctor
           join_paths(server_url, "#{format}/", result).to_s
         end
 
+        def create_plantuml_block(parent, content, attrs)
+          Asciidoctor::Block.new parent, :pass, {
+            content_model: :raw,
+            source: content,
+            subs: :default
+          }.merge(attrs)
+        end
+
         private
+
+        def insert_config_to_content(parent, config_path, content, attrs)
+          File.open(config_path) do |file|
+            config = file.read
+            subs = attrs['subs']
+            config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
+            content.insert(content.index("\n"), "\n#{config}") unless config.empty?
+            return content
+          end
+        end
 
         def plantuml_txt_content(code, format, attrs = {})
           url = gen_url(code, format)
@@ -178,6 +221,11 @@ module Asciidoctor
 
         def plantuml_disabled_content(code, attrs = {})
           _plantuml_error_content(code, attrs)
+        end
+
+        def plantuml_invalid_file(file, error, attrs = {})
+          error = "PlantUML Error: Could not parse \"#{file}\": #{error}"
+          _plantuml_error_content(error, attrs)
         end
 
         def _plantuml_error_content(error, attrs = {})
@@ -263,25 +311,21 @@ module Asciidoctor
       content_model :simple
 
       def process(parent, target, attrs)
-        lines = target.lines
-
-        lines = ['@startuml'] + target.lines unless target.lines[0] =~ /@startuml/
-
-        lines += ['@enduml'] unless target.lines[-1] =~ /@enduml/
-
-        content = Processor.plantuml_content(lines.join("\n"), attrs)
-
-        create_plantuml_block(parent, content, attrs)
+        content = Processor.plantuml_content(parent, target, attrs)
+        Processor.create_plantuml_block(parent, content, attrs)
       end
+    end
 
-      private
+    # PlantUML BlockMacroProcessor
+    class BlockMacroProcessor < Asciidoctor::Extensions::BlockMacroProcessor
+      use_dsl
+      named :plantuml
 
-      def create_plantuml_block(parent, content, attrs)
-        Asciidoctor::Block.new parent, :pass,  {
-          content_model: :raw,
-          source: content,
-          subs: :default
-        }.merge(attrs)
+      def process(parent, target, attrs)
+        base_dir = parent.document.base_dir
+        source_file = parent.document.path_resolver.system_path(target, base_dir, base_dir)
+        content = Processor.plantuml_content_from_file(parent, source_file, attrs)
+        Processor.create_plantuml_block(parent, content, attrs)
       end
     end
   end

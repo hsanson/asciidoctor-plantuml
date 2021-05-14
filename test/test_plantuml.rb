@@ -184,10 +184,69 @@ DOC_SVG = <<~ENDOFSTRING
   ----
 ENDOFSTRING
 
+DOC_BLOCK_MACRO = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  .Title Of this
+  plantuml::test/fixtures/test.puml[]
+ENDOFSTRING
+
+DOC_BLOCK_MACRO_MISSING_FILE = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  .Title Of this
+  plantuml::test/fixtures/missing.puml[]
+ENDOFSTRING
+
+DOC_SUBS_ATTRIBUTES = <<~ENDOFSTRING
+  = Hello PlantUML!
+  :text: Label
+
+  [plantuml, format="png", subs="attributes+"]
+  .Title Of this
+  ----
+  User -> (Start)
+  User --> (Use the application) : {text}
+  ----
+ENDOFSTRING
+
+DOC_CONFIG_INCLUDE = <<~ENDOFSTRING
+  = Hello PlantUML!
+  :plantuml-include: test/fixtures/config.puml
+
+  [plantuml, format="png"]
+  .Title Of this
+  ----
+  User -> (Start)
+  User --> (Use the application) : Label
+  ----
+ENDOFSTRING
+
+DOC_CONFIG_INCLUDE_MISSING_FILE = <<~ENDOFSTRING
+  = Hello PlantUML!
+  :plantuml-include: test/fixtures/missing.puml
+
+  [plantuml, format="png"]
+  .Title Of this
+  ----
+  User -> (Start)
+  User --> (Use the application) : Label
+  ----
+ENDOFSTRING
+
+DOC_CONFIG_INCLUDE_MACRO_BLOCK = <<~ENDOFSTRING
+  = Hello PlantUML!
+  :plantuml-include: test/fixtures/config.puml
+
+  [plantuml, format="png"]
+  plantuml::test/fixtures/test.puml[]
+ENDOFSTRING
+
 class PlantUmlTest < Test::Unit::TestCase
   GENURL = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
   GENURL2 = 'http://localhost:8080/plantuml/png/U9npA2v9B2efpStXYdRszmqmZ8NGHh4mleAkdGAAa15G22Pc7Clba9gN0jGE00W75Cm0'
   GENURL_ENCODING = 'http://localhost:8080/plantuml/png/~1U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
+  GENURL_CONFIG = 'http://localhost:8080/plantuml/png/~1U9nDZJ4Emp08HVUSWh4PUe4ELQIktQeUW3YeiMA31NZexKEg3bc-Fly1Vp97zLxBO5lcXeeLgh2aLQKIk7OwaHdJzb7fl3oaY0P6ja34Vjeo_nOArPn-dzz62jSxN5v7r_YVZo0S-4g0hPMSqBFm23Tuuanbc8YNEDy1SzOwlG00'
   SVGGENURL = 'http://localhost:8080/plantuml/svg/~1U9npA2v9B2efpStX2YrEBLBGjLFG20Q9Q4Bv804WIw4a8rKXiQ0W9pCviIGpFqzJmKh19p4fDOVB8JKl1QWT05kd5wq0'
 
   def setup
@@ -300,6 +359,76 @@ class PlantUmlTest < Test::Unit::TestCase
     element = elements.first
 
     assert_equal GENURL_ENCODING, element['src']
+  end
+
+  def test_plantuml_block_macro_processor
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL, element['src']
+  end
+
+  def test_should_show_file_error
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO_MISSING_FILE), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+    assert_includes html, 'No such file or directory'
+  end
+
+  def test_plantuml_subs_attributes
+    html = ::Asciidoctor.convert(StringIO.new(DOC_SUBS_ATTRIBUTES), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL_ENCODING, element['src']
+  end
+
+  def test_plantuml_config_include
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL_CONFIG, element['src']
+  end
+
+  def test_plantuml_config_include_missing_file
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE_MISSING_FILE), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+    assert_includes html, 'No such file or directory'
+  end
+
+  def test_plantuml_config_include_macro_block
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE_MACRO_BLOCK), backend: 'html5')
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('img.plantuml')
+
+    assert_equal elements.size, 1
+
+    element = elements.first
+
+    assert_equal GENURL_CONFIG, element['src']
   end
 
   def test_plantuml_id_attribute
