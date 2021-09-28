@@ -6,7 +6,7 @@ Horacio Sanson <https://github.com/hsanson/asciidoctor-diagram>
 :uri-asciidoctor-diagram: https://github.com/asciidoctor/asciidoctor-diagram
 
 ifdef::env-github[]
-image:https://img.shields.io/travis/hsanson/asciidoctor-plantuml/master.svg[Travis build status, link=https://travis-ci.com/hsanson/asciidoctor-plantuml]
+image:https://github.com/hsanson/asciidoctor-plantuml/actions/workflows/ruby.yml/badge.svg[Tests, link=https://github.com/hsanson/asciidoctor-plantuml/actions/workflows/ruby.yml]
 image:https://img.shields.io/gem/v/asciidoctor-plantuml.svg?style=flat[Latest Release, link=https://rubygems.org/gems/asciidoctor-plantuml]
 endif::[]
 
