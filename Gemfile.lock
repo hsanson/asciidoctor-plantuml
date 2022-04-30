@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    asciidoctor-plantuml (0.0.16)
+    asciidoctor-plantuml (0.1.0)
       asciidoctor (>= 2.0.17, < 3.0.0)
 
 GEM
