@@ -124,7 +124,7 @@ module Asciidoctor
         def plantuml_content_from_file(parent, target, attrs = {})
           base_dir = parent.document.base_dir
           source_file = parent.document.normalize_system_path(target, base_dir, base_dir, recover: false)
-          File.open(source_file, 'r') do |f|
+          ::File.open(source_file, mode: 'r') do |f|
             return plantuml_content(parent, f, attrs)
           end
         rescue StandardError => e
@@ -160,7 +160,7 @@ module Asciidoctor
         private
 
         def insert_config_to_content(parent, config_path, content, attrs)
-          File.open(config_path, 'r') do |file|
+          ::File.open(config_path, 'r') do |file|
             config = file.read
             subs = attrs['subs']
             config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
