@@ -153,8 +153,7 @@ module Asciidoctor
             config = file.read
             subs = attrs['subs']
             config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
-            content.insert(content.index("\n"), "\n#{config}") unless config.empty?
-            return content
+            return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
           end
         end
 
