@@ -198,6 +198,13 @@ DOC_BLOCK_MACRO_MISSING_FILE = <<~ENDOFSTRING
   plantuml::test/fixtures/missing.puml[]
 ENDOFSTRING
 
+DOC_BLOCK_MACRO_INSECURE_FILE = <<~ENDOFSTRING
+  = Hello PlantUML!
+
+  .Title Of this
+  plantuml::/etc/passwd[]
+ENDOFSTRING
+
 DOC_SUBS_ATTRIBUTES = <<~ENDOFSTRING
   = Hello PlantUML!
   :text: Label
@@ -225,6 +232,18 @@ ENDOFSTRING
 DOC_CONFIG_INCLUDE_MISSING_FILE = <<~ENDOFSTRING
   = Hello PlantUML!
   :plantuml-include: test/fixtures/missing.puml
+
+  [plantuml, format="png"]
+  .Title Of this
+  ----
+  User -> (Start)
+  User --> (Use the application) : Label
+  ----
+ENDOFSTRING
+
+DOC_CONFIG_INCLUDE_INSECURE_FILE = <<~ENDOFSTRING
+  = Hello PlantUML!
+  :plantuml-include: /etc/passwd
 
   [plantuml, format="png"]
   .Title Of this
@@ -375,12 +394,21 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_should_show_file_error
-    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO_MISSING_FILE), backend: 'html5')
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO_MISSING_FILE), backend: 'html5', safe: :secure)
     page = Nokogiri::HTML(html)
 
     elements = page.css('pre.plantuml-error')
     assert_equal elements.size, 1
     assert_includes html, 'No such file or directory'
+  end
+
+  def test_should_show_insecure_error
+    html = ::Asciidoctor.convert(StringIO.new(DOC_BLOCK_MACRO_INSECURE_FILE), backend: 'html5', safe: :secure)
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+    assert_includes html, 'is outside of jail'
   end
 
   def test_plantuml_subs_attributes
@@ -397,7 +425,7 @@ class PlantUmlTest < Test::Unit::TestCase
   end
 
   def test_plantuml_config_include
-    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE), backend: 'html5')
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE), backend: 'html5', safe: :secure)
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
@@ -418,8 +446,17 @@ class PlantUmlTest < Test::Unit::TestCase
     assert_includes html, 'No such file or directory'
   end
 
+  def test_plantuml_config_include_insecure_file
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE_INSECURE_FILE), backend: 'html5', safe: :secure)
+    page = Nokogiri::HTML(html)
+
+    elements = page.css('pre.plantuml-error')
+    assert_equal elements.size, 1
+    assert_includes html, 'is outside of jail'
+  end
+
   def test_plantuml_config_include_macro_block
-    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE_MACRO_BLOCK), backend: 'html5')
+    html = ::Asciidoctor.convert(StringIO.new(DOC_CONFIG_INCLUDE_MACRO_BLOCK), backend: 'html5', safe: :secure)
     page = Nokogiri::HTML(html)
 
     elements = page.css('img.plantuml')
