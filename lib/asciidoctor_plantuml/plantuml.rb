@@ -10,8 +10,8 @@ module Asciidoctor
   module PlantUml
     # PlantUML Configuration
     class Configuration
-      DEFAULT_URL = ENV['PLANTUML_URL'] || ''
-      DEFAULT_ENCODING = ENV['PLANTUML_ENCODING'] || 'legacy'
+      DEFAULT_URL = ENV.fetch('PLANTUML_URL', '')
+      DEFAULT_ENCODING = ENV.fetch('PLANTUML_ENCODING', 'legacy')
 
       attr_accessor :url, :txt_enable, :svg_enable, :png_enable, :encoding
 
@@ -246,7 +246,7 @@ module Asciidoctor
         end
 
         def expand_path(path, current, last, separator)
-          path = path[1..-1] if path.start_with?(separator) && current.zero?
+          path = path[1..] if path.start_with?(separator) && current.zero?
 
           path = [path, separator] unless path.end_with?(separator) || current == last
 
