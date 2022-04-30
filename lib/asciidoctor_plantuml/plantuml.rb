@@ -95,7 +95,7 @@ module Asciidoctor
 
           unless config_path.empty?
             begin
-              source_file = parent.document.path_resolver.system_path(config_path, base_dir, base_dir, recover: false)
+              source_file = parent.document.normalize_system_path(config_path, base_dir, base_dir, recover: false)
               content = insert_config_to_content(parent, source_file, content, attrs)
             rescue StandardError => e
               return plantuml_invalid_file(source_file, e.message, attrs)
@@ -123,7 +123,7 @@ module Asciidoctor
 
         def plantuml_content_from_file(parent, target, attrs = {})
           base_dir = parent.document.base_dir
-          source_file = parent.document.path_resolver.system_path(target, base_dir, base_dir, recover: false)
+          source_file = parent.document.normalize_system_path(target, base_dir, base_dir, recover: false)
           File.open(source_file, 'r') do |f|
             return plantuml_content(parent, f, attrs)
           end
