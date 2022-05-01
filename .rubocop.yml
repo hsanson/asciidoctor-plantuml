@@ -9,10 +9,10 @@ Naming/FileName:
     - lib/asciidoctor-plantuml.rb
 
 Metrics/MethodLength:
-  Max: 20
+  Max: 50
 
 Metrics/ClassLength:
-  Max: 210
+  Max: 250
   Exclude:
     - test/test_plantuml.rb
 

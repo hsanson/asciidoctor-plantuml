@@ -91,10 +91,16 @@ module Asciidoctor
 
           # insert global plantuml config after first line
           config_path = parent.attr('plantuml-include', '', true)
-          begin
-            content = insert_config_to_content(parent, config_path, content, attrs) unless config_path.empty?
-          rescue StandardError => e
-            return plantuml_invalid_file(config_path, e.message, attrs)
+
+          unless config_path.empty?
+            begin
+              source_file = parent.document.normalize_system_path(config_path, nil, nil, recover: false)
+              content = insert_config_to_content(parent, source_file, content, attrs)
+            rescue StandardError => e
+              return plantuml_invalid_file(source_file, e.message, attrs)
+            rescue SecurityError => e
+              return plantuml_insecure_file(source_file, e.message, attrs)
+            end
           end
 
           if %w[png svg txt].include?(format) && method("#{format}_enabled?").call
@@ -114,12 +120,14 @@ module Asciidoctor
           plantuml_content_format(parent, code, format, attrs)
         end
 
-        def plantuml_content_from_file(parent, source_file, attrs = {})
-          File.open(source_file) do |f|
-            return plantuml_content(parent, f, attrs)
-          end
+        def plantuml_content_from_file(parent, target, attrs = {})
+          source_file = parent.document.normalize_system_path(target, nil, nil, recover: false)
+          content = ::File.open(source_file, mode: FILE_READ_MODE)
+          plantuml_content(parent, content, attrs)
         rescue StandardError => e
           plantuml_invalid_file(source_file, e.message, attrs)
+        rescue SecurityError => e
+          plantuml_insecure_file(source_file, e.message, attrs)
         end
 
         # Compression code used to generate PlantUML URLs. Taken directly from
@@ -149,12 +157,10 @@ module Asciidoctor
         private
 
         def insert_config_to_content(parent, config_path, content, attrs)
-          File.open(config_path) do |file|
-            config = file.read
-            subs = attrs['subs']
-            config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
-            return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
-          end
+          config = File.read(config_path, mode: FILE_READ_MODE)
+          subs = attrs['subs']
+          config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
+          return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
         end
 
         def plantuml_txt_content(code, format, attrs = {})
@@ -224,6 +230,11 @@ module Asciidoctor
 
         def plantuml_invalid_file(file, error, attrs = {})
           error = "PlantUML Error: Could not parse \"#{file}\": #{error}"
+          _plantuml_error_content(error, attrs)
+        end
+
+        def plantuml_insecure_file(file, error, attrs = {})
+          error = "PlantUML Error: Could not read \"#{file}\": #{error}"
           _plantuml_error_content(error, attrs)
         end
 
@@ -321,9 +332,7 @@ module Asciidoctor
       named :plantuml
 
       def process(parent, target, attrs)
-        base_dir = parent.document.base_dir
-        source_file = parent.document.path_resolver.system_path(target, base_dir, base_dir)
-        content = Processor.plantuml_content_from_file(parent, source_file, attrs)
+        content = Processor.plantuml_content_from_file(parent, target, attrs)
         Processor.create_plantuml_block(parent, content, attrs)
       end
     end
