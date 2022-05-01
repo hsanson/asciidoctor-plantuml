@@ -123,7 +123,7 @@ module Asciidoctor
         def plantuml_content_from_file(parent, target, attrs = {})
           source_file = parent.document.normalize_system_path(target, nil, nil, recover: false)
           content = ::File.open(source_file, mode: FILE_READ_MODE)
-          return plantuml_content(parent, content, attrs)
+          plantuml_content(parent, content, attrs)
         rescue StandardError => e
           plantuml_invalid_file(source_file, e.message, attrs)
         rescue SecurityError => e
