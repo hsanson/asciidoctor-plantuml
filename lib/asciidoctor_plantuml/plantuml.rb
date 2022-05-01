@@ -122,9 +122,8 @@ module Asciidoctor
 
         def plantuml_content_from_file(parent, target, attrs = {})
           source_file = parent.document.normalize_system_path(target, nil, nil, recover: false)
-          ::File.open(source_file, mode: 'r') do |f|
-            return plantuml_content(parent, f, attrs)
-          end
+          content = ::File.open(source_file, mode: FILE_READ_MODE)
+          return plantuml_content(parent, content, attrs)
         rescue StandardError => e
           plantuml_invalid_file(source_file, e.message, attrs)
         rescue SecurityError => e
@@ -158,12 +157,10 @@ module Asciidoctor
         private
 
         def insert_config_to_content(parent, config_path, content, attrs)
-          ::File.open(config_path, 'r') do |file|
-            config = file.read
-            subs = attrs['subs']
-            config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
-            return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
-          end
+          config = File.read(config_path, mode: FILE_READ_MODE)
+          subs = attrs['subs']
+          config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
+          return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
         end
 
         def plantuml_txt_content(code, format, attrs = {})
