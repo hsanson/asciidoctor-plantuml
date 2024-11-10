@@ -81,25 +81,28 @@ module Asciidoctor
         def plantuml_content_format(parent, code, format, attrs = {})
           content = code.read
 
-          # honor subs attributes
-          # e.g. replace asciidoc variables
-          subs = attrs['subs']
-          content = parent.apply_subs(content, parent.resolve_subs(subs)) if subs
-
           # add @start... and @end... if missing
           content = "@startuml\n#{content}\n@enduml" unless content =~ /^@start.*@end[a-z]*$/m
 
-          # insert global plantuml config after first line
-          config_path = parent.attr('plantuml-include', '', true)
+          if parent
+            # honor subs attributes
+            # e.g. replace asciidoc variables
+            subs = attrs['subs']
+            content = parent.apply_subs(content, parent.resolve_subs(subs)) if subs
 
-          unless config_path.empty?
-            begin
-              source_file = parent.document.normalize_system_path(config_path, nil, nil, recover: false)
-              content = insert_config_to_content(parent, source_file, content, attrs)
-            rescue StandardError => e
-              return plantuml_invalid_file(source_file, e.message, attrs)
-            rescue SecurityError => e
-              return plantuml_insecure_file(source_file, e.message, attrs)
+
+            # insert global plantuml config after first line
+            config_path = parent.attr('plantuml-include', '', true)
+
+            unless config_path.empty?
+              begin
+                source_file = parent.document.normalize_system_path(config_path, nil, nil, recover: false)
+                content = insert_config_to_content(parent, source_file, content, attrs)
+              rescue StandardError => e
+                return plantuml_invalid_file(source_file, e.message, attrs)
+              rescue SecurityError => e
+                return plantuml_insecure_file(source_file, e.message, attrs)
+              end
             end
           end
 

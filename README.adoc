@@ -29,13 +29,13 @@ commands:
 
 A diagram is written inside an open block inside any asciidoc file:
 
-----
+....
 [plantuml, format="png", id="myId"]
 ----
 alice -> bob : hello
 bob -> alice : hello
 ----
-----
+....
 
 NOTE: You can omit the @startuml/@enduml delimiters. The extension adds them if missing.
 
