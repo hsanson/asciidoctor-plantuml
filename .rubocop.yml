@@ -19,6 +19,12 @@ Metrics/ClassLength:
 Metrics/AbcSize:
   Max: 30
 
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Metrics/CyclomaticComplexity:
+  Max: 20
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 

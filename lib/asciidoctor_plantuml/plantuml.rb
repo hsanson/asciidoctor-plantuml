@@ -90,7 +90,6 @@ module Asciidoctor
             subs = attrs['subs']
             content = parent.apply_subs(content, parent.resolve_subs(subs)) if subs
 
-
             # insert global plantuml config after first line
             config_path = parent.attr('plantuml-include', '', true)
 
