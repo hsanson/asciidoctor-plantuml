@@ -79,7 +79,7 @@ module Asciidoctor
         end
 
         def plantuml_content_format(parent, code, format, attrs = {})
-          content = code.read
+          content = code.respond_to?(:read) ? code.read : code
 
           # add @start... and @end... if missing
           content = "@startuml\n#{content}\n@enduml" unless content =~ /^@start.*@end[a-z]*$/m
