@@ -1,4 +1,7 @@
 ---
+plugins:
+  - rubocop-rake
+
 AllCops:
   NewCops: enable
   TargetRubyVersion: 2.6
