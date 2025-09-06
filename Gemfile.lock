@@ -1,53 +1,61 @@
-PATH
-  remote: .
-  specs:
-    asciidoctor-plantuml (0.1.1)
-      asciidoctor (>= 2.0.17, < 3.0.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
-    asciidoctor (2.0.17)
-    ast (2.4.2)
-    mini_portile2 (2.8.0)
+    asciidoctor (2.0.23)
+    ast (2.4.3)
+    json (2.13.2)
+    language_server-protocol (3.17.0.5)
+    lint_roller (1.1.0)
+    mini_portile2 (2.8.9)
     nokogiri (1.13.10)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
-    parallel (1.22.1)
-    parser (3.1.2.0)
+    parallel (1.27.0)
+    parser (3.3.9.0)
       ast (~> 2.4.1)
-    power_assert (2.0.1)
-    racc (1.6.1)
+      racc
+    power_assert (2.0.5)
+    prism (1.4.0)
+    racc (1.8.1)
     rainbow (3.1.1)
-    rake (13.0.6)
-    regexp_parser (2.3.1)
-    rexml (3.3.9)
-    rubocop (1.28.2)
+    rake (13.3.0)
+    regexp_parser (2.11.2)
+    rubocop (1.80.2)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
       parallel (~> 1.10)
-      parser (>= 3.1.0.0)
+      parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 1.8, < 3.0)
-      rexml
-      rubocop-ast (>= 1.17.0, < 2.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.46.0, < 2.0)
       ruby-progressbar (~> 1.7)
-      unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.17.0)
-      parser (>= 3.1.1.0)
-    ruby-progressbar (1.11.0)
-    test-unit (3.5.3)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.46.0)
+      parser (>= 3.3.7.2)
+      prism (~> 1.4)
+    rubocop-rake (0.7.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.1)
+    ruby-progressbar (1.13.0)
+    test-unit (3.7.0)
       power_assert
-    unicode-display_width (2.1.0)
+    unicode-display_width (3.1.5)
+      unicode-emoji (~> 4.0, >= 4.0.4)
+    unicode-emoji (4.0.4)
 
 PLATFORMS
   ruby
+  x86_64-linux
 
 DEPENDENCIES
-  asciidoctor-plantuml!
+  asciidoctor (>= 2.0.17, < 3.0.0)
   bundler (~> 2.2)
   nokogiri (~> 1.13.6)
   rake (~> 13.0)
   rubocop (~> 1.28)
+  rubocop-rake (~> 0.7)
   test-unit (~> 3.5)
 
 BUNDLED WITH
-   2.2.27
+   2.7.1

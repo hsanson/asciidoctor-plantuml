@@ -47,7 +47,7 @@ module Asciidoctor
       ENCODINGS_MAGIC_STRINGS_MAP = Hash.new('')
       ENCODINGS_MAGIC_STRINGS_MAP['deflate'] = '~1'
 
-      URI_SCHEMES_REGEXP = ::URI::DEFAULT_PARSER.make_regexp(%w[http https])
+      URI_SCHEMES_REGEXP = ::URI::RFC2396_PARSER.make_regexp(%w[http https])
 
       class << self
         def valid_format?(format)
@@ -160,7 +160,7 @@ module Asciidoctor
           config = File.read(config_path, mode: FILE_READ_MODE)
           subs = attrs['subs']
           config = parent.apply_subs(config, parent.resolve_subs(subs)) if subs
-          return content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
+          content.dup.insert(content.index("\n"), "\n#{config}") unless config.empty?
         end
 
         def plantuml_txt_content(code, format, attrs = {})
